@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏰 Venezia Palazzi</title>
+    <title>🌉 Venezia Ponti</title>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     <style>
@@ -116,7 +116,7 @@
 <body>
     <div id="login-screen">
         <div class="login-box">
-            <h1>🏰 Venezia Palazzi</h1>
+            <h1>🌉 Venezia Ponti</h1>
             <p>Inserisci la password per accedere</p>
             <input type="password" id="password-input" placeholder="Password">
             <button onclick="checkPassword()">Accedi</button>
@@ -126,7 +126,7 @@
     <div id="app" class="hidden">
         <div id="header">
             <div class="header-left">
-                <span class="header-title">🏰 <span id="header-title-text">Palazzi di Venezia</span></span>
+                <span class="header-title">🌉 <span id="header-title-text">Ponti di Venezia</span></span>
                 <div class="language-switch">
                     <button class="lang-btn active" onclick="setLanguage('it')">IT</button>
                     <button class="lang-btn" onclick="setLanguage('en')">EN</button>
@@ -134,19 +134,19 @@
             </div>
             <div class="maps-links">
                 <a href="https://viralvenice.github.io/venezia-musei/" class="map-link" title="Musei">🏛️</a>
-                <a href="https://viralvenice.github.io/venezia-palazzi/" class="map-link current" title="Palazzi">🏰</a>
-                <a href="https://viralvenice.github.io/venezia-ponti/" class="map-link" title="Ponti">🌉</a>
+                <a href="https://viralvenice.github.io/venezia-palazzi/" class="map-link" title="Palazzi">🏰</a>
+                <a href="https://viralvenice.github.io/venezia-ponti/" class="map-link current" title="Ponti">🌉</a>
                 <a href="https://viralvenice.github.io/venezia-chiese/" class="map-link" title="Chiese">⛪</a>
                 <a href="https://viralvenice.github.io/venezia-attrazioni/" class="map-link" title="Attrazioni">🎭</a>
                 <a href="https://viralvenice.github.io/venezia-foto/" class="map-link" title="Spot Fotografici">📸</a>
             </div>
         </div>
 
-        <div class="add-mode-indicator" id="add-mode-indicator">Clicca sulla mappa per aggiungere un palazzo</div>
+        <div class="add-mode-indicator" id="add-mode-indicator">Clicca sulla mappa per aggiungere un ponte</div>
 
         <div id="main-container">
             <div id="sidebar">
-                <div class="sidebar-header"><h2 id="sidebar-title">Legenda Palazzi</h2></div>
+                <div class="sidebar-header"><h2 id="sidebar-title">Legenda Ponti</h2></div>
                 <div id="places-list"></div>
             </div>
             <div id="map"></div>
@@ -156,7 +156,7 @@
 
         <div id="admin-panel" class="admin-panel">
             <h3>Gestione Dati</h3>
-            <button onclick="toggleAddMode()">Aggiungi Palazzo sulla Mappa</button>
+            <button onclick="toggleAddMode()">Aggiungi Ponte sulla Mappa</button>
             <button onclick="exportData()">Esporta Dati (JSON)</button>
             <button onclick="document.getElementById('import-file').click()">Importa Dati (JSON)</button>
             <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
@@ -165,7 +165,7 @@
 
         <div id="edit-modal" class="edit-modal">
             <div class="edit-modal-content">
-                <h2 id="modal-title">Modifica Palazzo</h2>
+                <h2 id="modal-title">Modifica Ponte</h2>
                 <form id="edit-form">
                     <div class="form-row">
                         <div class="form-group"><label>Nome (Italiano) *</label><input type="text" id="edit-name-it" required></div>
@@ -196,19 +196,19 @@
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGVhbmdlbGEiLCJhIjoiY21nNnltb3lqMG00NjJtc2U1MGwzeGhkYiJ9.-b-5VYMsx38e2YB6JB4qEw';
         const PASSWORD = 'venezia2025';
-        const PLACE_EMOJI = '🏰';
-        const STORAGE_KEY = 'venezia-palazzi-data';
+        const PLACE_EMOJI = '🌉';
+        const STORAGE_KEY = 'venezia-ponti-data';
         let currentLanguage = 'it', map, markers = [], currentPopup = null, addMode = false, editingMuseumId = null, subsectionCounter = 0;
         
         const defaultMuseums = [{
             id:1,
-            name:{it:"Ca' d'Oro",en:"Ca' d'Oro"},
-            duration:60,
-            coordinates:[12.3331,45.4404],
-            description:{it:"Splendido palazzo gotico veneziano affacciato sul Canal Grande.",en:"Splendid Venetian Gothic palace overlooking the Grand Canal."},
-            subsections:[{title:{it:"Storia",en:"History"},description:{it:"Costruito nel XV secolo per la famiglia Contarini.",en:"Built in the 15th century for the Contarini family."}}],
-            howToArrive:{it:"Vaporetto: linea 1 fermata Ca' d'Oro.",en:"Vaporetto: line 1 stop Ca' d'Oro."},
-            ticketsHours:{it:"Aperto 10:00-18:00. Biglietto €10.",en:"Open 10:00-18:00. Ticket €10."}
+            name:{it:"Ponte di Rialto",en:"Rialto Bridge"},
+            duration:15,
+            coordinates:[12.3359,45.4380],
+            description:{it:"Il più antico e famoso ponte sul Canal Grande, costruito tra il 1588 e il 1591.",en:"The oldest and most famous bridge on the Grand Canal, built between 1588 and 1591."},
+            subsections:[{title:{it:"Storia",en:"History"},description:{it:"Prima del ponte in pietra esistevano ponti di legno che crollarono più volte.",en:"Before the stone bridge there were wooden bridges that collapsed several times."}}],
+            howToArrive:{it:"Vaporetto: linea 1 o 2 fermata Rialto.",en:"Vaporetto: line 1 or 2 stop Rialto."},
+            ticketsHours:{it:"",en:""}
         }];
         
         let museums = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultMuseums;
@@ -230,7 +230,7 @@
         }
         
         function updateLanguage() {
-            const texts = {it:{headerTitle:'Palazzi di Venezia',sidebarTitle:'Legenda Palazzi'},en:{headerTitle:'Venice Palaces',sidebarTitle:'Palaces Legend'}};
+            const texts = {it:{headerTitle:'Ponti di Venezia',sidebarTitle:'Legenda Ponti'},en:{headerTitle:'Venice Bridges',sidebarTitle:'Bridges Legend'}};
             document.getElementById('header-title-text').textContent = texts[currentLanguage].headerTitle;
             document.getElementById('sidebar-title').textContent = texts[currentLanguage].sidebarTitle;
             renderPlacesList();
@@ -352,7 +352,7 @@
         };
         
         window.deleteMuseum = function(id) {
-            if (!confirm(currentLanguage==='it'?'Vuoi eliminare questo palazzo?':'Delete this palace?')) return;
+            if (!confirm(currentLanguage==='it'?'Vuoi eliminare questo ponte?':'Delete this bridge?')) return;
             museums = museums.filter(m => m.id !== id);
             saveData();
             renderPlacesList();
@@ -362,12 +362,12 @@
 
         function openEditModalForNew(ll) {
             editingMuseumId = null;
-            const m = {name:{it:'',en:''},duration:60,coordinates:[ll.lng,ll.lat],description:{it:'',en:''},subsections:[],howToArrive:{it:'',en:''},ticketsHours:{it:'',en:''}};
+            const m = {name:{it:'',en:''},duration:15,coordinates:[ll.lng,ll.lat],description:{it:'',en:''},subsections:[],howToArrive:{it:'',en:''},ticketsHours:{it:'',en:''}};
             openEditModal(m);
         }
 
         function openEditModal(m) {
-            document.getElementById('modal-title').textContent = editingMuseumId ? '✏️ Modifica Palazzo' : '➕ Aggiungi Nuovo Palazzo';
+            document.getElementById('modal-title').textContent = editingMuseumId ? '✏️ Modifica Ponte' : '➕ Aggiungi Nuovo Ponte';
             document.getElementById('edit-name-it').value = m.name.it;
             document.getElementById('edit-name-en').value = m.name.en;
             document.getElementById('edit-duration').value = m.duration || '';
@@ -455,7 +455,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `venezia-palazzi-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `venezia-ponti-backup-${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
         }
