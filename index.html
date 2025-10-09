@@ -17,6 +17,9 @@
         .login-box input:focus { outline: none; border-color: #81C9DF; }
         .login-box button { width: 100%; padding: 15px; background: #81C9DF; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
         .login-box button:hover { background: #6ab5cc; transform: translateY(-2px); }
+        .sync-indicator { position: fixed; top: 80px; right: 30px; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 999; display: none; animation: fadeIn 0.3s; }
+        .sync-indicator.error { background: #f44336; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         #header { position: fixed; top: 0; left: 0; right: 0; height: 70px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; box-shadow: 0 2px 20px rgba(0,0,0,0.05); z-index: 1000; }
         .header-left { display: flex; align-items: center; gap: 15px; }
         .header-title { font-size: 24px; font-weight: 600; color: #333; }
@@ -60,7 +63,6 @@
         .carousel-container { position: relative; margin-top: 20px; }
         .carousel-section { display: none; animation: fadeIn 0.3s; }
         .carousel-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
         .section-header { padding: 15px; background: #f8f4f0; border-radius: 12px; margin-bottom: 15px; }
         .section-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; word-wrap: break-word; }
         .section-description { color: #666; line-height: 1.6; font-size: 14px; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; }
@@ -124,6 +126,8 @@
     </div>
 
     <div id="app" class="hidden">
+        <div id="sync-indicator" class="sync-indicator">☁️ Sincronizzato</div>
+        
         <div id="header">
             <div class="header-left">
                 <span class="header-title">🌉 <span id="header-title-text">Ponti di Venezia</span></span>
@@ -133,16 +137,16 @@
                 </div>
             </div>
             <div class="maps-links">
-                <a href="https://viralvenice.github.io/venezia-musei/" class="map-link" title="Musei">🏛️</a>
-                <a href="https://viralvenice.github.io/venezia-palazzi/" class="map-link" title="Palazzi">🏰</a>
-                <a href="https://viralvenice.github.io/venezia-ponti/" class="map-link current" title="Ponti">🌉</a>
-                <a href="https://viralvenice.github.io/venezia-chiese/" class="map-link" title="Chiese">⛪</a>
-                <a href="https://viralvenice.github.io/venezia-attrazioni/" class="map-link" title="Attrazioni">🎭</a>
-                <a href="https://viralvenice.github.io/venezia-foto/" class="map-link" title="Spot Fotografici">📸</a>
+                <a href="index.html" class="map-link" title="Musei">🏛️</a>
+                <a href="palazzi.html" class="map-link" title="Palazzi">🏰</a>
+                <a href="ponti.html" class="map-link current" title="Ponti">🌉</a>
+                <a href="chiese.html" class="map-link" title="Chiese">⛪</a>
+                <a href="attrazioni.html" class="map-link" title="Attrazioni">🎭</a>
+                <a href="foto.html" class="map-link" title="Spot Fotografici">📸</a>
             </div>
         </div>
 
-        <div class="add-mode-indicator" id="add-mode-indicator">Clicca sulla mappa per aggiungere un ponte</div>
+        <div class="add-mode-indicator" id="add-mode-indicator">📍 Clicca sulla mappa per aggiungere un ponte</div>
 
         <div id="main-container">
             <div id="sidebar">
@@ -155,17 +159,17 @@
         <button class="admin-btn" onclick="toggleAdmin()">⚙️</button>
 
         <div id="admin-panel" class="admin-panel">
-            <h3>Gestione Dati</h3>
-            <button onclick="toggleAddMode()">Aggiungi Ponte sulla Mappa</button>
-            <button onclick="exportData()">Esporta Dati (JSON)</button>
-            <button onclick="document.getElementById('import-file').click()">Importa Dati (JSON)</button>
+            <h3>🔧 Gestione Dati</h3>
+            <button onclick="toggleAddMode()">📍 Aggiungi Ponte sulla Mappa</button>
+            <button onclick="exportData()">📥 Esporta Dati (JSON)</button>
+            <button onclick="document.getElementById('import-file').click()">📤 Importa Dati (JSON)</button>
             <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
-            <button onclick="resetToDefault()">Ripristina Dati Predefiniti</button>
+            <button onclick="resetToDefault()">🔄 Ripristina Dati Predefiniti</button>
         </div>
 
         <div id="edit-modal" class="edit-modal">
             <div class="edit-modal-content">
-                <h2 id="modal-title">Modifica Ponte</h2>
+                <h2 id="modal-title">✏️ Modifica Ponte</h2>
                 <form id="edit-form">
                     <div class="form-row">
                         <div class="form-group"><label>Nome (Italiano) *</label><input type="text" id="edit-name-it" required></div>
@@ -182,24 +186,50 @@
                     <div class="form-group"><label>Come Arrivare (Inglese)</label><textarea id="edit-arrive-en"></textarea></div>
                     <div class="form-group"><label>Orari e Biglietti (Italiano)</label><textarea id="edit-tickets-it" placeholder="Lascia vuoto se non applicabile"></textarea></div>
                     <div class="form-group"><label>Orari e Biglietti (Inglese)</label><textarea id="edit-tickets-en" placeholder="Leave empty if not applicable"></textarea></div>
-                    <div class="subsections-header"><h3>Sottosezioni</h3><button type="button" class="btn-add-subsection" onclick="addSubsection()">Aggiungi</button></div>
+                    <div class="subsections-header"><h3>Sottosezioni</h3><button type="button" class="btn-add-subsection" onclick="addSubsection()">➕ Aggiungi</button></div>
                     <div id="subsections-container"></div>
                     <div class="modal-actions">
                         <button type="button" class="btn-cancel" onclick="closeEditModal()">Annulla</button>
-                        <button type="submit" class="btn-save">Salva</button>
+                        <button type="submit" class="btn-save">💾 Salva</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCqNw9Zvt15cr3mgWn30oV2WZkdUvNSbY8",
+          authDomain: "venezia-maps.firebaseapp.com",
+          projectId: "venezia-maps",
+          storageBucket: "venezia-maps.firebasestorage.app",
+          messagingSenderId: "380464519031",
+          appId: "1:380464519031:web:6ad7a39478cebb022db372"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+        window.onSnapshot = onSnapshot;
+    </script>
+
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGVhbmdlbGEiLCJhIjoiY21nNnltb3lqMG00NjJtc2U1MGwzeGhkYiJ9.-b-5VYMsx38e2YB6JB4qEw';
         const PASSWORD = 'venezia2025';
         const PLACE_EMOJI = '🌉';
-        const STORAGE_KEY = 'venezia-ponti-data';
-        let currentLanguage = 'it', map, markers = [], currentPopup = null, addMode = false, editingMuseumId = null, subsectionCounter = 0;
+        const FIRESTORE_COLLECTION = 'places';
+        const FIRESTORE_DOC_ID = 'ponti';
         
+        let currentLanguage = 'it', map, markers = [], currentPopup = null, addMode = false, editingMuseumId = null, subsectionCounter = 0;
+        let museums = [];
+        let unsubscribe = null;
+
         const defaultMuseums = [{
             id:1,
             name:{it:"Ponte di Rialto",en:"Rialto Bridge"},
@@ -210,8 +240,66 @@
             howToArrive:{it:"Vaporetto: linea 1 o 2 fermata Rialto.",en:"Vaporetto: line 1 or 2 stop Rialto."},
             ticketsHours:{it:"",en:""}
         }];
-        
-        let museums = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultMuseums;
+
+        function showSyncIndicator(message, isError = false) {
+            const indicator = document.getElementById('sync-indicator');
+            indicator.textContent = message;
+            indicator.className = 'sync-indicator' + (isError ? ' error' : '');
+            indicator.style.display = 'block';
+            setTimeout(() => { indicator.style.display = 'none'; }, 3000);
+        }
+
+        async function loadDataFromFirestore() {
+            try {
+                const docRef = window.doc(window.db, FIRESTORE_COLLECTION, FIRESTORE_DOC_ID);
+                const docSnap = await window.getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    museums = docSnap.data().data || defaultMuseums;
+                    showSyncIndicator('☁️ Dati caricati dal cloud');
+                } else {
+                    museums = defaultMuseums;
+                    await saveDataToFirestore();
+                }
+                
+                renderPlacesList();
+                addMarkers();
+            } catch (error) {
+                console.error('Errore caricamento Firestore:', error);
+                showSyncIndicator('❌ Errore sincronizzazione', true);
+                museums = defaultMuseums;
+                renderPlacesList();
+                addMarkers();
+            }
+        }
+
+        async function saveDataToFirestore() {
+            try {
+                const docRef = window.doc(window.db, FIRESTORE_COLLECTION, FIRESTORE_DOC_ID);
+                await window.setDoc(docRef, { data: museums, updatedAt: new Date().toISOString() });
+                showSyncIndicator('☁️ Salvato sul cloud');
+            } catch (error) {
+                console.error('Errore salvataggio Firestore:', error);
+                showSyncIndicator('❌ Errore salvataggio', true);
+            }
+        }
+
+        function setupRealtimeSync() {
+            const docRef = window.doc(window.db, FIRESTORE_COLLECTION, FIRESTORE_DOC_ID);
+            unsubscribe = window.onSnapshot(docRef, (doc) => {
+                if (doc.exists()) {
+                    const newData = doc.data().data;
+                    if (JSON.stringify(newData) !== JSON.stringify(museums)) {
+                        museums = newData;
+                        renderPlacesList();
+                        addMarkers();
+                        showSyncIndicator('🔄 Dati aggiornati');
+                    }
+                }
+            }, (error) => {
+                console.error('Errore sync real-time:', error);
+            });
+        }
 
         function checkPassword() {
             if (document.getElementById('password-input').value === PASSWORD) {
@@ -237,7 +325,11 @@
             if (currentPopup) currentPopup.remove();
         }
 
-        function initializeApp() { initMap(); renderPlacesList(); addMarkers(); }
+        async function initializeApp() { 
+            initMap(); 
+            await loadDataFromFirestore();
+            setupRealtimeSync();
+        }
 
         function initMap() {
             map = new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/light-v11',center:[12.3350,45.4371],zoom:13.5});
@@ -268,7 +360,7 @@
                 };
                 item.ondragstart = (e) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', idx); };
                 item.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
-                item.ondrop = (e) => {
+                item.ondrop = async (e) => {
                     e.preventDefault();
                     const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
                     const toIdx = parseInt(item.dataset.index);
@@ -276,7 +368,7 @@
                         const temp = museums[fromIdx];
                         museums.splice(fromIdx, 1);
                         museums.splice(toIdx, 0, temp);
-                        saveData();
+                        await saveDataToFirestore();
                         renderPlacesList();
                     }
                 };
@@ -351,10 +443,10 @@
             openEditModal(m);
         };
         
-        window.deleteMuseum = function(id) {
+        window.deleteMuseum = async function(id) {
             if (!confirm(currentLanguage==='it'?'Vuoi eliminare questo ponte?':'Delete this bridge?')) return;
             museums = museums.filter(m => m.id !== id);
-            saveData();
+            await saveDataToFirestore();
             renderPlacesList();
             addMarkers();
             if (currentPopup) currentPopup.remove();
@@ -413,7 +505,7 @@
             if (item) item.remove();
         };
 
-        document.getElementById('edit-form').addEventListener('submit', e => {
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const subsections = [];
             document.querySelectorAll('.subsection-item').forEach(item => {
@@ -439,7 +531,7 @@
             } else {
                 museums.push(museumData);
             }
-            saveData();
+            await saveDataToFirestore();
             renderPlacesList();
             addMarkers();
             closeEditModal();
@@ -460,15 +552,15 @@
             URL.revokeObjectURL(url);
         }
 
-        function importData(event) {
+        async function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
                     museums = data;
-                    saveData();
+                    await saveDataToFirestore();
                     renderPlacesList();
                     addMarkers();
                     alert(currentLanguage==='it'?'Dati importati con successo!':'Data imported successfully!');
@@ -480,18 +572,16 @@
             event.target.value = '';
         }
 
-        function resetToDefault() {
+        async function resetToDefault() {
             if (confirm(currentLanguage==='it'?'Ripristinare i dati predefiniti? Tutti i dati attuali saranno persi.':'Reset to default data? All current data will be lost.')) {
                 museums = [...defaultMuseums];
-                saveData();
+                await saveDataToFirestore();
                 renderPlacesList();
                 addMarkers();
                 if (currentPopup) currentPopup.remove();
                 alert(currentLanguage==='it'?'Dati ripristinati!':'Data restored!');
             }
         }
-
-        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(museums)); }
     </script>
 </body>
 </html>
