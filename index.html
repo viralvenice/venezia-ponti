@@ -2,36 +2,94 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>🌉 Venezia Ponti</title>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: linear-gradient(135deg, #f5f5f0 0%, #faf9f6 100%); overflow: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: linear-gradient(135deg, #f5f5f0 0%, #faf9f6 100%); overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        
+        /* Login Screen */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #81C9DF 0%, #6ab5cc 100%); display: flex; align-items: center; justify-content: center; z-index: 10000; }
-        .login-box { background: rgba(255, 255, 255, 0.95); padding: 50px 40px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); text-align: center; }
+        .login-box { background: rgba(255, 255, 255, 0.95); padding: 50px 40px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 90%; }
         .login-box h1 { font-size: 32px; color: #333; margin-bottom: 10px; font-weight: 600; }
         .login-box p { color: #666; margin-bottom: 30px; font-size: 16px; }
         .login-box input { width: 100%; padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; margin-bottom: 20px; transition: all 0.3s; }
         .login-box input:focus { outline: none; border-color: #81C9DF; }
         .login-box button { width: 100%; padding: 15px; background: #81C9DF; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
         .login-box button:hover { background: #6ab5cc; transform: translateY(-2px); }
+        
+        /* Sync Indicator */
         .sync-indicator { position: fixed; top: 80px; right: 30px; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 999; display: none; animation: fadeIn 0.3s; }
         .sync-indicator.error { background: #f44336; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Header */
         #header { position: fixed; top: 0; left: 0; right: 0; height: 70px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; box-shadow: 0 2px 20px rgba(0,0,0,0.05); z-index: 1000; }
         .header-left { display: flex; align-items: center; gap: 15px; }
         .header-title { font-size: 24px; font-weight: 600; color: #333; }
         .language-switch { display: flex; gap: 10px; }
         .lang-btn { width: 40px; height: 40px; border: none; background: #f0f0f0; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; }
         .lang-btn.active { background: #81C9DF; color: white; transform: scale(1.1); }
+        
+        /* Maps Navigation */
+        .maps-nav-wrapper { display: flex; align-items: center; gap: 10px; }
         .maps-links { display: flex; gap: 10px; flex-wrap: wrap; }
         .map-link { padding: 8px 15px; background: #f5f5f5; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; transition: all 0.3s; text-decoration: none; color: #333; }
         .map-link.current { background: #81C9DF; color: white; font-weight: 600; }
         .map-link:hover:not(.current) { background: #e0e0e0; }
+        
+        /* Hamburger Menu - Hidden on Desktop */
+        .hamburger-btn { 
+            display: none;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            z-index: 1002;
+        }
+        .hamburger-icon {
+            width: 24px;
+            height: 20px;
+            position: relative;
+            display: inline-block;
+        }
+        .hamburger-icon span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: #333;
+            border-radius: 3px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
+        }
+        .hamburger-icon span:nth-child(1) { top: 0px; }
+        .hamburger-icon span:nth-child(2) { top: 8px; }
+        .hamburger-icon span:nth-child(3) { top: 16px; }
+        .hamburger-btn.active .hamburger-icon span:nth-child(1) {
+            top: 8px;
+            transform: rotate(135deg);
+        }
+        .hamburger-btn.active .hamburger-icon span:nth-child(2) {
+            opacity: 0;
+            left: -60px;
+        }
+        .hamburger-btn.active .hamburger-icon span:nth-child(3) {
+            top: 8px;
+            transform: rotate(-135deg);
+        }
+        
+        /* Main Container */
         #main-container { position: fixed; top: 70px; left: 0; right: 0; bottom: 0; display: flex; }
-        #sidebar { width: 320px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); overflow-y: auto; box-shadow: 2px 0 20px rgba(0,0,0,0.05); }
+        
+        /* Sidebar */
+        #sidebar { width: 320px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); overflow-y: auto; box-shadow: 2px 0 20px rgba(0,0,0,0.05); transition: transform 0.3s ease-in-out; }
         .sidebar-header { padding: 20px; background: #81C9DF; color: white; }
         .sidebar-header h2 { font-size: 20px; font-weight: 600; }
         .place-item { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px; }
@@ -43,11 +101,34 @@
         .place-duration { font-size: 13px; color: #81C9DF; }
         .drag-handle { cursor: grab; font-size: 16px; color: #999; }
         .drag-handle:active { cursor: grabbing; }
+        
+        /* Sidebar Overlay for Mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 997;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+        }
+        
+        /* Map */
         #map { flex: 1; cursor: default; }
         #map.add-mode { cursor: crosshair; }
+        
+        /* Add Mode Indicator */
         .add-mode-indicator { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: #81C9DF; color: white; padding: 15px 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(129, 201, 223, 0.4); z-index: 999; font-weight: 600; display: none; animation: pulse 2s infinite; }
         .add-mode-indicator.active { display: block; }
         @keyframes pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } }
+        
+        /* Popup */
         .mapboxgl-popup-content { padding: 0; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); max-width: 450px; overflow: hidden; }
         .popup-header { padding: 20px; background: linear-gradient(135deg, #81C9DF 0%, #6ab5cc 100%); color: white; position: relative; }
         .popup-title { font-size: 22px; font-weight: 600; margin-bottom: 5px; padding-right: 80px; word-wrap: break-word; }
@@ -60,6 +141,8 @@
         .popup-body::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
         .popup-body::-webkit-scrollbar-thumb { background: #81C9DF; border-radius: 10px; }
         .popup-main-description { color: #333; line-height: 1.6; margin-bottom: 20px; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; }
+        
+        /* Carousel */
         .carousel-container { position: relative; margin-top: 20px; }
         .carousel-section { display: none; animation: fadeIn 0.3s; }
         .carousel-section.active { display: block; }
@@ -73,12 +156,16 @@
         .carousel-dots { display: flex; gap: 8px; }
         .dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; transition: all 0.3s; cursor: pointer; }
         .dot.active { background: #81C9DF; width: 24px; border-radius: 4px; }
+        
+        /* Info Boxes */
         .info-box { margin-top: 20px; padding: 15px; border-radius: 12px; border-left: 4px solid #81C9DF; }
         .how-to-arrive { background: #f0f8fa; }
         .tickets-hours { background: #fff4e6; border-left-color: #ffa726; }
         .info-box h4 { color: #81C9DF; margin-bottom: 10px; font-size: 16px; }
         .tickets-hours h4 { color: #ffa726; }
         .info-box p { color: #666; line-height: 1.6; font-size: 14px; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; }
+        
+        /* Edit Modal */
         .edit-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001; overflow-y: auto; }
         .edit-modal.active { display: flex; align-items: flex-start; justify-content: center; padding: 50px 20px; }
         .edit-modal-content { background: white; border-radius: 16px; padding: 30px; max-width: 700px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
@@ -105,14 +192,295 @@
         .btn-save:hover { background: #6ab5cc; transform: translateY(-2px); }
         .btn-cancel { background: #f0f0f0; color: #333; }
         .btn-cancel:hover { background: #e0e0e0; }
+        
+        /* Admin Button */
         .admin-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #81C9DF; border: none; border-radius: 50%; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 20px rgba(129, 201, 223, 0.4); transition: all 0.3s; z-index: 999; }
         .admin-btn:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(129, 201, 223, 0.6); }
-        .admin-panel { display: none; position: fixed; top: 70px; right: 0; width: 400px; height: calc(100% - 70px); background: white; box-shadow: -2px 0 20px rgba(0,0,0,0.1); padding: 30px; overflow-y: auto; z-index: 998; }
+        
+        /* Admin Panel */
+        .admin-panel { display: none; position: fixed; top: 70px; right: 0; width: 400px; height: calc(100% - 70px); background: white; box-shadow: -2px 0 20px rgba(0,0,0,0.1); padding: 30px; overflow-y: auto; z-index: 998; transition: transform 0.3s ease-in-out; }
         .admin-panel.active { display: block; }
         .admin-panel h3 { margin-bottom: 20px; color: #333; }
         .admin-panel button { width: 100%; padding: 15px; margin-bottom: 10px; background: #81C9DF; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; text-align: left; }
         .admin-panel button:hover { background: #6ab5cc; transform: translateX(-5px); }
         .hidden { display: none; }
+        
+        /* Mobile Responsive */
+        @media screen and (max-width: 768px) {
+            /* Header Mobile */
+            #header {
+                height: 60px;
+                padding: 0 15px;
+            }
+            
+            .header-title {
+                font-size: 20px;
+            }
+            
+            .hamburger-btn {
+                display: block;
+                order: -1;
+            }
+            
+            .language-switch {
+                order: 1;
+            }
+            
+            .lang-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 13px;
+            }
+            
+            /* Maps Navigation Mobile */
+            .maps-nav-wrapper {
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                padding: 10px 15px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .maps-links {
+                flex-wrap: nowrap;
+                gap: 8px;
+                padding-bottom: 2px;
+            }
+            
+            .map-link {
+                padding: 6px 12px;
+                font-size: 16px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            
+            /* Main Container Mobile */
+            #main-container {
+                top: 115px;
+            }
+            
+            /* Sidebar Mobile */
+            #sidebar {
+                position: fixed;
+                top: 115px;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                z-index: 998;
+                transform: translateX(-100%);
+            }
+            
+            #sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .sidebar-overlay {
+                display: block;
+                pointer-events: none;
+            }
+            
+            .sidebar-overlay.active {
+                pointer-events: all;
+            }
+            
+            /* Map Mobile */
+            #map {
+                width: 100%;
+            }
+            
+            /* Popup Mobile */
+            .mapboxgl-popup-content {
+                max-width: calc(100vw - 40px);
+            }
+            
+            .mapboxgl-popup-close-button {
+                width: 44px;
+                height: 44px;
+                font-size: 24px;
+            }
+            
+            .popup-header {
+                padding: 15px;
+            }
+            
+            .popup-title {
+                font-size: 18px;
+                padding-right: 70px;
+            }
+            
+            .popup-action-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+            
+            .popup-body {
+                max-height: 60vh;
+                padding: 15px;
+            }
+            
+            .carousel-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+            
+            /* Edit Modal Mobile */
+            .edit-modal.active {
+                padding: 20px 15px;
+            }
+            
+            .edit-modal-content {
+                padding: 20px;
+                max-height: calc(100vh - 40px);
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Admin Panel Mobile */
+            .admin-panel {
+                width: 100%;
+                transform: translateX(100%);
+            }
+            
+            .admin-panel.active {
+                transform: translateX(0);
+            }
+            
+            /* Admin Button Mobile */
+            .admin-btn {
+                width: 56px;
+                height: 56px;
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            /* Add Mode Indicator Mobile */
+            .add-mode-indicator {
+                top: 125px;
+                font-size: 14px;
+                padding: 10px 20px;
+                width: calc(100% - 40px);
+                max-width: 300px;
+            }
+            
+            /* Sync Indicator Mobile */
+            .sync-indicator {
+                top: 125px;
+                right: 15px;
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            /* Header Extra Small */
+            .header-title {
+                font-size: 18px;
+            }
+            
+            .header-title .header-emoji {
+                display: none;
+            }
+            
+            /* Sidebar Extra Small */
+            #sidebar {
+                width: 260px;
+            }
+            
+            .place-item {
+                padding: 12px 15px;
+            }
+            
+            .place-name {
+                font-size: 14px;
+            }
+            
+            /* Login Box Mobile */
+            .login-box {
+                padding: 30px 20px;
+            }
+            
+            .login-box h1 {
+                font-size: 24px;
+            }
+            
+            .login-box p {
+                font-size: 14px;
+            }
+        }
+        
+        /* Touch Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .place-item:active {
+                background: #e8f6fa;
+            }
+            
+            .map-link:active {
+                transform: scale(0.95);
+            }
+            
+            .admin-btn:active {
+                transform: scale(0.95);
+            }
+            
+            .carousel-btn:active {
+                transform: scale(0.95);
+            }
+            
+            /* Increase touch targets */
+            .popup-action-btn,
+            .carousel-btn,
+            .lang-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
+        
+        /* Landscape Mobile */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            #header {
+                height: 50px;
+            }
+            
+            .maps-nav-wrapper {
+                top: 50px;
+            }
+            
+            #main-container {
+                top: 95px;
+            }
+            
+            #sidebar {
+                top: 95px;
+            }
+            
+            .popup-body {
+                max-height: 50vh;
+            }
+        }
+        
+        /* iOS Safari Fixes */
+        @supports (-webkit-touch-callout: none) {
+            .sidebar-overlay {
+                -webkit-backdrop-filter: blur(10px);
+            }
+            
+            #sidebar {
+                -webkit-transform: translateX(-100%);
+            }
+            
+            #sidebar.active {
+                -webkit-transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -120,7 +488,7 @@
         <div class="login-box">
             <h1>🌉 Venezia Ponti</h1>
             <p>Inserisci la password per accedere</p>
-            <input type="password" id="password-input" placeholder="Password">
+            <input type="password" id="password-input" placeholder="Password" autocomplete="off">
             <button onclick="checkPassword()">Accedi</button>
         </div>
     </div>
@@ -129,30 +497,47 @@
         <div id="sync-indicator" class="sync-indicator">☁️ Sincronizzato</div>
         
         <div id="header">
+            <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
+                <span class="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+            
             <div class="header-left">
-                <span class="header-title">🌉 <span id="header-title-text">Ponti di Venezia</span></span>
-                <div class="language-switch">
-                    <button class="lang-btn active" onclick="setLanguage('it')">IT</button>
-                    <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+                <span class="header-title"><span class="header-emoji">🌉</span> <span id="header-title-text">Ponti di Venezia</span></span>
+            </div>
+            
+            <div class="language-switch">
+                <button class="lang-btn active" onclick="setLanguage('it')">IT</button>
+                <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+            </div>
+            
+            <div class="maps-nav-wrapper">
+                <div class="maps-links">
+                    <a href="https://viralvenice.github.io/venezia-musei/" class="map-link" title="Musei">🏛️</a>
+                    <a href="https://viralvenice.github.io/venezia-palazzi/" class="map-link" title="Palazzi">🏰</a>
+                    <a href="https://viralvenice.github.io/venezia-ponti/" class="map-link current" title="Ponti">🌉</a>
+                    <a href="https://viralvenice.github.io/venezia-chiese/" class="map-link" title="Chiese">⛪</a>
+                    <a href="https://viralvenice.github.io/venezia-attrazioni/" class="map-link" title="Attrazioni">🎭</a>
+                    <a href="https://viralvenice.github.io/venezia-foto/" class="map-link" title="Spot Fotografici">📸</a>
                 </div>
             </div>
-            <div class="maps-links">
-    <a href="https://viralvenice.github.io/venezia-musei/" class="map-link" title="Musei">🏛️</a>
-    <a href="https://viralvenice.github.io/venezia-palazzi/" class="map-link" title="Palazzi">🏰</a>
-    <a href="https://viralvenice.github.io/venezia-ponti/" class="map-link current" title="Ponti">🌉</a>
-    <a href="https://viralvenice.github.io/venezia-chiese/" class="map-link" title="Chiese">⛪</a>
-    <a href="https://viralvenice.github.io/venezia-attrazioni/" class="map-link" title="Attrazioni">🎭</a>
-    <a href="https://viralvenice.github.io/venezia-foto/" class="map-link" title="Spot Fotografici">📸</a>
-</div>
         </div>
 
         <div class="add-mode-indicator" id="add-mode-indicator">📍 Clicca sulla mappa per aggiungere un ponte</div>
 
         <div id="main-container">
+            <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+            
             <div id="sidebar">
-                <div class="sidebar-header"><h2 id="sidebar-title">Legenda Ponti</h2></div>
+                <div class="sidebar-header">
+                    <h2 id="sidebar-title">Legenda Ponti</h2>
+                </div>
                 <div id="places-list"></div>
             </div>
+            
             <div id="map"></div>
         </div>
 
@@ -229,6 +614,9 @@
         let currentLanguage = 'it', map, markers = [], currentPopup = null, addMode = false, editingMuseumId = null, subsectionCounter = 0;
         let museums = [];
         let unsubscribe = null;
+        let isMobile = window.innerWidth <= 768;
+        let touchStartX = null;
+        let touchStartY = null;
 
         const defaultMuseums = [{
             id:1,
@@ -240,6 +628,75 @@
             howToArrive:{it:"Vaporetto: linea 1 o 2 fermata Rialto.",en:"Vaporetto: line 1 or 2 stop Rialto."},
             ticketsHours:{it:"",en:""}
         }];
+
+        // Mobile Detection and Responsiveness
+        function checkMobile() {
+            isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+                closeSidebar();
+                closeAdmin();
+            }
+        }
+
+        window.addEventListener('resize', checkMobile);
+
+        // Sidebar Management
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const hamburger = document.getElementById('hamburger-btn');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const hamburger = document.getElementById('hamburger-btn');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburger.classList.remove('active');
+        }
+
+        function openSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const hamburger = document.getElementById('hamburger-btn');
+            
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            hamburger.classList.add('active');
+        }
+
+        // Touch Gestures for Sidebar
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function(e) {
+            if (!touchStartX || !touchStartY) return;
+            
+            const touchEndX = e.touches[0].clientX;
+            const touchEndY = e.touches[0].clientY;
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+            
+            // Check if horizontal swipe
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX > 50 && document.getElementById('sidebar').classList.contains('active')) {
+                    closeSidebar();
+                } else if (diffX < -50 && touchStartX < 20) {
+                    openSidebar();
+                }
+            }
+            
+            touchStartX = null;
+            touchStartY = null;
+        }, { passive: true });
 
         function showSyncIndicator(message, isError = false) {
             const indicator = document.getElementById('sync-indicator');
@@ -308,7 +765,10 @@
                 initializeApp();
             } else alert('Password errata!');
         }
-        document.getElementById('password-input').addEventListener('keypress', e => { if (e.key === 'Enter') checkPassword(); });
+        
+        document.getElementById('password-input').addEventListener('keypress', e => { 
+            if (e.key === 'Enter') checkPassword(); 
+        });
 
         function setLanguage(lang) {
             currentLanguage = lang;
@@ -318,7 +778,10 @@
         }
         
         function updateLanguage() {
-            const texts = {it:{headerTitle:'Ponti di Venezia',sidebarTitle:'Legenda Ponti'},en:{headerTitle:'Venice Bridges',sidebarTitle:'Bridges Legend'}};
+            const texts = {
+                it: { headerTitle: 'Ponti di Venezia', sidebarTitle: 'Legenda Ponti' },
+                en: { headerTitle: 'Venice Bridges', sidebarTitle: 'Bridges Legend' }
+            };
             document.getElementById('header-title-text').textContent = texts[currentLanguage].headerTitle;
             document.getElementById('sidebar-title').textContent = texts[currentLanguage].sidebarTitle;
             renderPlacesList();
@@ -329,19 +792,42 @@
             initMap(); 
             await loadDataFromFirestore();
             setupRealtimeSync();
+            checkMobile();
         }
 
         function initMap() {
-            map = new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/light-v11',center:[12.3350,45.4371],zoom:13.5});
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/light-v11',
+                center: [12.3350, 45.4371],
+                zoom: isMobile ? 12.5 : 13.5,
+                pitch: 0,
+                bearing: 0
+            });
+            
             map.addControl(new mapboxgl.NavigationControl(), 'top-right');
-            map.on('click', e => { if (addMode) { openEditModalForNew(e.lngLat); toggleAddMode(); } });
+            
+            if (isMobile) {
+                map.dragRotate.disable();
+                map.touchZoomRotate.disableRotation();
+            }
+            
+            map.on('click', e => { 
+                if (addMode) { 
+                    openEditModalForNew(e.lngLat); 
+                    toggleAddMode(); 
+                } 
+            });
         }
 
         function toggleAddMode() {
             addMode = !addMode;
             document.getElementById('add-mode-indicator').classList.toggle('active');
             document.getElementById('map').classList.toggle('add-mode');
-            if (addMode) document.getElementById('admin-panel').classList.remove('active');
+            if (addMode) {
+                closeAdmin();
+                closeSidebar();
+            }
         }
 
         function renderPlacesList() {
@@ -350,29 +836,51 @@
             museums.forEach((m, idx) => {
                 const item = document.createElement('div');
                 item.className = 'place-item';
-                item.draggable = true;
+                item.draggable = !isMobile;
                 item.dataset.index = idx;
                 item.onclick = (e) => {
                     if (e.target.classList.contains('drag-handle')) return;
                     document.querySelectorAll('.place-item').forEach(i => i.classList.remove('active'));
                     item.classList.add('active');
-                    if (m.coordinates) { map.flyTo({center:m.coordinates,zoom:16}); showPopup(m); }
-                };
-                item.ondragstart = (e) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', idx); };
-                item.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
-                item.ondrop = async (e) => {
-                    e.preventDefault();
-                    const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
-                    const toIdx = parseInt(item.dataset.index);
-                    if (fromIdx !== toIdx) {
-                        const temp = museums[fromIdx];
-                        museums.splice(fromIdx, 1);
-                        museums.splice(toIdx, 0, temp);
-                        await saveDataToFirestore();
-                        renderPlacesList();
+                    if (m.coordinates) { 
+                        map.flyTo({center: m.coordinates, zoom: 16}); 
+                        showPopup(m);
+                        if (isMobile) {
+                            setTimeout(() => closeSidebar(), 300);
+                        }
                     }
                 };
-                item.innerHTML = `<span class="drag-handle">☰</span><span class="place-emoji">${PLACE_EMOJI}</span><div class="place-info"><div class="place-name">${m.name[currentLanguage]}</div>${m.duration ? `<div class="place-duration">⏱️ ${m.duration} min</div>` : ''}</div>`;
+                
+                if (!isMobile) {
+                    item.ondragstart = (e) => { 
+                        e.dataTransfer.effectAllowed = 'move'; 
+                        e.dataTransfer.setData('text/plain', idx); 
+                    };
+                    item.ondragover = (e) => { 
+                        e.preventDefault(); 
+                        e.dataTransfer.dropEffect = 'move'; 
+                    };
+                    item.ondrop = async (e) => {
+                        e.preventDefault();
+                        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+                        const toIdx = parseInt(item.dataset.index);
+                        if (fromIdx !== toIdx) {
+                            const temp = museums[fromIdx];
+                            museums.splice(fromIdx, 1);
+                            museums.splice(toIdx, 0, temp);
+                            await saveDataToFirestore();
+                            renderPlacesList();
+                        }
+                    };
+                }
+                
+                item.innerHTML = `
+                    ${!isMobile ? '<span class="drag-handle">☰</span>' : ''}
+                    <span class="place-emoji">${PLACE_EMOJI}</span>
+                    <div class="place-info">
+                        <div class="place-name">${m.name[currentLanguage]}</div>
+                        ${m.duration ? `<div class="place-duration">⏱️ ${m.duration} min</div>` : ''}
+                    </div>`;
                 list.appendChild(item);
             });
         }
@@ -384,7 +892,7 @@
                 if (!m.coordinates) return;
                 const el = document.createElement('div');
                 el.innerHTML = PLACE_EMOJI;
-                el.style.fontSize = '28px';
+                el.style.fontSize = isMobile ? '24px' : '28px';
                 el.style.cursor = 'pointer';
                 const marker = new mapboxgl.Marker(el).setLngLat(m.coordinates).addTo(map);
                 el.addEventListener('click', (e) => {
@@ -411,13 +919,39 @@
                     <div class="popup-main-description">${m.description[currentLanguage]}</div>
                     ${sub.length > 0 ? `
                         <div class="carousel-container" id="carousel-${m.id}">
-                            ${sub.map((s,i) => `<div class="carousel-section ${i===0?'active':''}" data-index="${i}"><div class="section-header" style="background:${getColorForSection(i)};"><div class="section-title">${s.title[currentLanguage]}</div><div class="section-description">${s.description[currentLanguage]}</div></div></div>`).join('')}
-                            ${sub.length>1 ? `<div class="carousel-nav"><button class="carousel-btn" onclick="changeSlide(${m.id},-1)">←</button><div class="carousel-dots">${sub.map((_,i) => `<div class="dot ${i===0?'active':''}" data-index="${i}"></div>`).join('')}</div><button class="carousel-btn" onclick="changeSlide(${m.id},1)">→</button></div>` : ''}
+                            ${sub.map((s,i) => `
+                                <div class="carousel-section ${i===0?'active':''}" data-index="${i}">
+                                    <div class="section-header" style="background:${getColorForSection(i)};">
+                                        <div class="section-title">${s.title[currentLanguage]}</div>
+                                        <div class="section-description">${s.description[currentLanguage]}</div>
+                                    </div>
+                                </div>`).join('')}
+                            ${sub.length>1 ? `
+                                <div class="carousel-nav">
+                                    <button class="carousel-btn" onclick="changeSlide(${m.id},-1)">←</button>
+                                    <div class="carousel-dots">
+                                        ${sub.map((_,i) => `<div class="dot ${i===0?'active':''}" data-index="${i}"></div>`).join('')}
+                                    </div>
+                                    <button class="carousel-btn" onclick="changeSlide(${m.id},1)">→</button>
+                                </div>` : ''}
                         </div>` : ''}
-                    ${m.howToArrive && (m.howToArrive[currentLanguage] && m.howToArrive[currentLanguage].trim()) ? `<div class="info-box how-to-arrive"><h4>🚢 ${currentLanguage==='it'?'Come Arrivare':'How to Get There'}</h4><p>${m.howToArrive[currentLanguage]}</p></div>` : ''}
-                    ${m.ticketsHours && (m.ticketsHours[currentLanguage] && m.ticketsHours[currentLanguage].trim()) ? `<div class="info-box tickets-hours"><h4>🎫 ${currentLanguage==='it'?'Orari e Biglietti':'Hours and Tickets'}</h4><p>${m.ticketsHours[currentLanguage]}</p></div>` : ''}
+                    ${m.howToArrive && (m.howToArrive[currentLanguage] && m.howToArrive[currentLanguage].trim()) ? 
+                        `<div class="info-box how-to-arrive">
+                            <h4>🚢 ${currentLanguage==='it'?'Come Arrivare':'How to Get There'}</h4>
+                            <p>${m.howToArrive[currentLanguage]}</p>
+                        </div>` : ''}
+                    ${m.ticketsHours && (m.ticketsHours[currentLanguage] && m.ticketsHours[currentLanguage].trim()) ? 
+                        `<div class="info-box tickets-hours">
+                            <h4>🎫 ${currentLanguage==='it'?'Orari e Biglietti':'Hours and Tickets'}</h4>
+                            <p>${m.ticketsHours[currentLanguage]}</p>
+                        </div>` : ''}
                 </div>`;
-            currentPopup = new mapboxgl.Popup({maxWidth:'450px',offset:25}).setLngLat(m.coordinates).setHTML(popupContent).addTo(map);
+            currentPopup = new mapboxgl.Popup({
+                maxWidth: isMobile ? 'calc(100vw - 40px)' : '450px',
+                offset: 25,
+                closeButton: true,
+                closeOnClick: false
+            }).setLngLat(m.coordinates).setHTML(popupContent).addTo(map);
         }
 
         window.changeSlide = function(mid, dir) {
@@ -427,8 +961,10 @@
             let cur = Array.from(secs).findIndex(s => s.classList.contains('active')), nw = cur + dir;
             if (nw < 0) nw = secs.length - 1;
             if (nw >= secs.length) nw = 0;
-            secs[cur].classList.remove('active'); dots[cur].classList.remove('active');
-            secs[nw].classList.add('active'); dots[nw].classList.add('active');
+            secs[cur].classList.remove('active'); 
+            dots[cur].classList.remove('active');
+            secs[nw].classList.add('active'); 
+            dots[nw].classList.add('active');
         };
         
         function getColorForSection(i) {
@@ -454,7 +990,15 @@
 
         function openEditModalForNew(ll) {
             editingMuseumId = null;
-            const m = {name:{it:'',en:''},duration:15,coordinates:[ll.lng,ll.lat],description:{it:'',en:''},subsections:[],howToArrive:{it:'',en:''},ticketsHours:{it:'',en:''}};
+            const m = {
+                name:{it:'',en:''},
+                duration:15,
+                coordinates:[ll.lng,ll.lat],
+                description:{it:'',en:''},
+                subsections:[],
+                howToArrive:{it:'',en:''},
+                ticketsHours:{it:'',en:''}
+            };
             openEditModal(m);
         }
 
@@ -476,11 +1020,13 @@
             subsectionCounter = 0;
             if (m.subsections && m.subsections.length > 0) m.subsections.forEach(s => addSubsectionToForm(s));
             document.getElementById('edit-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeEditModal() {
             document.getElementById('edit-modal').classList.remove('active');
             editingMuseumId = null;
+            document.body.style.overflow = '';
         }
 
         function addSubsectionToForm(s = null) {
@@ -539,7 +1085,17 @@
             showPopup(museumData);
         });
 
-        function toggleAdmin() { document.getElementById('admin-panel').classList.toggle('active'); }
+        function toggleAdmin() { 
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('active');
+            if (isMobile && panel.classList.contains('active')) {
+                closeSidebar();
+            }
+        }
+        
+        function closeAdmin() {
+            document.getElementById('admin-panel').classList.remove('active');
+        }
 
         function exportData() {
             const dataStr = JSON.stringify(museums, null, 2);
@@ -585,4 +1141,3 @@
     </script>
 </body>
 </html>
-
